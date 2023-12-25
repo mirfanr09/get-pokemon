@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Get Pokemon</title>
+  </head>
+  <style>
+    body {
+      background-color: #ffde00;
+      font-family: "Arial", sans-serif;
+    }
+
+    .center {
+      text-align: center;
+    }
+    .pokemon {
+      flex: 0 1 calc(33.333% - 10px);
+      margin-bottom: 10px;
+      background-color: #f5f5f5;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      padding: 20px;
+    }
+    #pokemonContainer {
+      background-color: #f4d03f;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    #pokemonContainer img {
+      width: 100px;
+      height: auto;
+    }
+
+    #pokemonContainer h3 {
+      margin: 10px 0;
+    }
+
+    #pokemonContainer p {
+      font-size: 16px;
+      color: #333;
+    }
+
+    button {
+      background-color: #000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #f39c12;
+    }
+  </style>
+  <body>
+    <center><h1>GET POKEMON</h1></center>
+    <br />
+    <center>
+      <button id="loadButton" onclick="fetchData()">GET!!!</button>
+      <div id="pokemonContainer"></div>
+    </center>
+
+    <script>
+      function getColorByType(type) {
+        const typeColors = {
+          grass: "#8DD694",
+          fire: "#E69D8D",
+          water: "#8DC6E6",
+          bug: "#BDDD7A",
+          normal: "#B1B1B1",
+          poison: "#A55DB1",
+          electric: "#E7C859",
+          ground: "#EFBE85",
+          fairy: "#EEA1E2",
+        };
+      }
+
+      function fetchPokemonDetails(pokemonUrl) {
+        return fetch(pokemonUrl)
+          .then((response) => response.json())
+          .then((details) => {
+            return {
+              name: details.name,
+              type: details.types[0].type.name,
+              sprite: details.sprites.front_default,
+            };
+          });
+      }
+
+      function displayPokemons(pokemons) {
+        const container = document.getElementById("pokemonContainer");
+        container.innerHTML = "";
+
+        pokemons.forEach((pokemon) => {
+          const pokemonDiv = document.createElement("div");
+          pokemonDiv.style.backgroundColor = getColorByType(pokemon.type);
+          pokemonDiv.innerHTML = `
+      <h3>${pokemon.name}</h3>
+      <img src="${pokemon.sprite}" alt="${pokemon.name}">
+      <p>Type: ${pokemon.type}</p>
+    `;
+          container.appendChild(pokemonDiv);
+        });
+      }
+
+      function fetchAndDisplayPokemons() {
+        fetch("https://pokeapi.co/api/v2/pokemon?limit=36")
+          .then((response) => response.json())
+          .then((data) => {
+            const pokemonPromises = data.results.map((pokemon) =>
+              fetchPokemonDetails(pokemon.url)
+            );
+            return Promise.all(pokemonPromises);
+          })
+          .then((pokemons) => {
+            displayPokemons(pokemons);
+          })
+          .catch((error) => {
+            console.error("Error fetching Pokémon:", error);
+          });
+      }
+
+      function fetchData() {
+        fetchAndDisplayPokemons();
+      }
+    </script>
+  </body>
+</html>
